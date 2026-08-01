@@ -1,0 +1,602 @@
+*{
+    box-sizing:border-box;
+}
+
+
+html,
+body{
+
+    width:100%;
+    height:100%;
+
+    margin:0;
+
+    overflow:hidden;
+
+}
+
+
+
+body{
+
+    font-family:
+    Arial,
+    "Noto Sans KR",
+    sans-serif;
+
+
+    background-image:
+    url("../public/background.jpg");
+
+
+    background-size:
+    cover;
+
+
+    background-position:
+    center;
+
+
+    background-repeat:
+    no-repeat;
+
+}
+
+
+
+
+
+.container{
+
+
+    width:100%;
+
+    height:100%;
+
+
+    min-height:100dvh;
+
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    justify-content:center;
+
+
+    align-items:flex-start;
+
+
+
+    padding-left:
+    clamp(
+        30px,
+        10vw,
+        180px
+    );
+
+
+
+    background:
+    rgba(0,0,0,.55);
+
+
+
+    color:white;
+
+
+}
+
+
+
+
+
+.content{
+
+
+    width:
+
+    min(
+        90vw,
+        700px
+    );
+
+
+}
+
+
+
+
+
+h1{
+
+
+    margin:0;
+
+
+    font-size:
+
+    clamp(
+        32px,
+        5vw,
+        72px
+    );
+
+
+
+    line-height:1.1;
+
+
+    white-space:nowrap;
+
+
+
+    text-shadow:
+
+    0 0 20px #ffcc00;
+
+
+}
+
+
+
+
+
+.subtitle{
+
+
+    margin-top:20px;
+
+
+    margin-bottom:50px;
+
+
+
+    font-size:
+
+    clamp(
+        16px,
+        2vw,
+        28px
+    );
+
+
+}
+
+
+
+
+
+.menu{
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    align-items:flex-start;
+
+
+    gap:20px;
+
+
+}
+
+
+
+
+.menu a{
+
+
+    width:
+
+    clamp(
+        260px,
+        25vw,
+        380px
+    );
+
+
+
+    height:
+
+    clamp(
+        55px,
+        7vh,
+        80px
+    );
+
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:flex-start;
+
+
+
+    padding-left:35px;
+
+
+
+    border-radius:50px;
+
+
+
+    background:
+
+    linear-gradient(
+        90deg,
+        #ffcc00,
+        #ffe477
+    );
+
+
+
+    color:#222;
+
+
+    text-decoration:none;
+
+
+
+    font-size:
+
+    clamp(
+        18px,
+        2vw,
+        28px
+    );
+
+
+
+    font-weight:bold;
+
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+
+.menu a:hover{
+
+
+    transform:
+    translateX(15px);
+
+
+}
+
+
+
+
+
+footer{
+
+
+    position:absolute;
+
+
+    left:
+
+    clamp(
+        30px,
+        10vw,
+        180px
+    );
+
+
+    bottom:
+
+    30px;
+
+
+
+    opacity:.6;
+
+
+}
+
+
+
+
+
+/* 세로 모바일 */
+
+@media(max-aspect-ratio:3/4){
+
+
+.container{
+
+
+    padding-left:25px;
+
+
+}
+
+
+
+h1{
+
+
+    white-space:normal;
+
+
+    max-width:90vw;
+
+
+}
+
+
+
+.menu a{
+
+
+    width:280px;
+
+
+}
+
+
+}
+
+
+
+
+
+/* 가로 모바일 */
+
+@media(max-height:500px){
+
+
+.container{
+
+
+    justify-content:flex-start;
+
+
+    padding-top:40px;
+
+
+}
+
+
+
+h1{
+
+
+    font-size:35px;
+
+
+}
+
+
+
+.subtitle{
+
+
+    margin-bottom:20px;
+
+
+}
+
+
+
+.menu{
+
+
+    gap:10px;
+
+
+}
+
+
+
+.menu a{
+
+
+    height:50px;
+
+
+}
+
+
+}
+
+
+/* ======================
+   Settings UI
+====================== */
+
+
+.settings-panel{
+
+
+    width:
+    min(90vw,500px);
+
+
+
+    padding:40px;
+
+
+
+    border-radius:30px;
+
+
+
+    background:
+
+    rgba(255,255,255,.12);
+
+
+
+    backdrop-filter:
+    blur(12px);
+
+
+
+    color:white;
+
+
+
+}
+
+
+
+
+.settings-panel h1{
+
+
+    margin-bottom:40px;
+
+
+}
+
+
+
+
+.settings-panel h2{
+
+
+    margin-top:25px;
+
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+.language-list{
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    gap:15px;
+
+
+}
+
+
+
+
+.settings-panel button,
+.settings-button{
+
+
+    width:100%;
+
+
+    height:55px;
+
+
+
+    border:none;
+
+
+    border-radius:30px;
+
+
+
+    background:#ffcc00;
+
+
+
+    color:#222;
+
+
+
+    font-size:20px;
+
+
+
+    font-weight:bold;
+
+
+
+    cursor:pointer;
+
+
+
+    text-decoration:none;
+
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+}
+
+
+
+.settings-panel button:hover,
+.settings-button:hover{
+
+
+    transform:
+    scale(1.05);
+
+
+}
+
+
+
+
+.volume-box{
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:15px;
+
+
+}
+
+
+
+.volume-box input{
+
+
+    flex:1;
+
+
+}
+
+
+#volumeValue{
+
+
+    width:40px;
+
+
+}

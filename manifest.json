@@ -1,0 +1,18 @@
+{
+    "name": "Don't Take My Gummies!",
+    "short_name": "Gummies",
+    "description": "Operation: Save the Gummies",
+    "lang": "en",
+    "start_url": "menu.html",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#ffcc00",
+    "background_color": "#111111",
+    "icons": [
+        {
+            "src": "public/icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

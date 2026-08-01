@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+
+<title data-lang="settings">
+Settings
+</title>
+
+<script src="js/lang.js"></script>
+
+<script>
+applyLanguage();
+</script>
+
+<link rel="stylesheet" href="css/menu.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="settings-panel">
+
+
+<h1 data-lang="settings">
+Settings
+</h1>
+
+
+
+<section>
+
+<h2 data-lang="language">
+Language
+</h2>
+
+
+<div class="language-list">
+
+
+<button onclick="changeLanguage('en')">
+🇺🇸 English
+</button>
+
+
+<button onclick="changeLanguage('ko')">
+🇰🇷 한국어
+</button>
+
+
+<button onclick="changeLanguage('fr')">
+🇫🇷 Français
+</button>
+
+
+</div>
+
+</section>
+
+
+
+
+<section>
+
+<h2 data-lang="volume">
+Volume
+</h2>
+
+
+<div class="volume-box">
+
+
+<input
+type="range"
+id="volume"
+min="0"
+max="100"
+value="100">
+
+
+<span id="volumeValue">
+100
+</span>%
+
+
+</div>
+
+</section>
+
+
+
+<a href="index.html"
+class="settings-button"
+data-lang="back">
+<button type="button" name="button">← Back</button>
+</a>
+
+
+</div>
+
+
+</div>
+
+
+
+<script src="js/settings.js"></script>
+
+
+</body>
+
+</html>
