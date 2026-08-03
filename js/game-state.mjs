@@ -27,7 +27,9 @@ const EVENT_CARDS = Object.freeze([
   { id: 'late-fee', type: 'debt', amount: 50_000 },
   { id: 'repair-bill', type: 'debt', amount: 100_000 },
   { id: 'medical-bill', type: 'debt', amount: 150_000 },
-  { id: 'gummy-loss', type: 'gummies', amount: -1 }
+  { id: 'gummy-loss', type: 'gummies', amount: -1 },
+  { id: 'debt-clear-roulette', kind: 'debt-clear-roulette' },
+  { id: 'debt-double-roulette', kind: 'debt-double-roulette' }
 ]);
 
 function createBoard() {
@@ -95,6 +97,17 @@ export function applyGummies(player, delta) {
 
 export function rollDie(random) {
   return Math.floor(random() * 6) + 1;
+}
+
+function drawBlackjackCard(random) {
+  return Math.floor(random() * 10) + 1;
+}
+
+function blackjackTotal(cards) {
+  const baseTotal = cards.reduce((total, card) => total + (card === 1 ? 1 : card), 0);
+  const aces = cards.filter((card) => card === 1).length;
+
+  return aces > 0 && baseTotal + 10 <= 21 ? baseTotal + 10 : baseTotal;
 }
 
 export function rollStandardTurn(game) {
@@ -196,6 +209,30 @@ export function resolveTile(game) {
       ...game,
       phase: 'awaiting-world-travel',
       pendingAction: { type: 'world-travel' }
+    };
+  }
+
+  if (tile.type === TILE_TYPES.MAFIA) {
+    return {
+      ...game,
+      phase: 'awaiting-mafia',
+      pendingAction: { type: 'mafia', correctCup: Math.floor(game.random() * 3) }
+    };
+  }
+
+  if (tile.type === TILE_TYPES.BLACKJACK) {
+    return {
+      ...game,
+      phase: 'awaiting-blackjack',
+      pendingAction: { type: 'blackjack' }
+    };
+  }
+
+  if (tile.type === TILE_TYPES.DICE_GAME) {
+    return {
+      ...game,
+      phase: 'awaiting-dice-bet',
+      pendingAction: { type: 'dice-bet' }
     };
   }
 
@@ -341,6 +378,152 @@ export function declineWorldTravel(game) {
   return evaluateResult(declinedGame);
 }
 
+export function chooseMafiaCup(game, cup) {
+  if (game.phase !== 'awaiting-mafia' || game.pendingAction?.correctCup === undefined) {
+    return game;
+  }
+
+  if (!Number.isInteger(cup) || cup < 0 || cup > 2) {
+    throw new RangeError('Mafia cup must be 0, 1, or 2.');
+  }
+
+  const activePlayer = getActivePlayer(game);
+  const updatedPlayer = cup === game.pendingAction.correctCup
+    ? activePlayer
+    : applyDebt(activePlayer, 150_000);
+
+  return finishTurn({
+    ...replaceActivePlayer(game, updatedPlayer),
+    pendingAction: null,
+    log: [...game.log, {
+      type: 'mafia-cup',
+      playerId: activePlayer.id,
+      cup,
+      correctCup: game.pendingAction.correctCup
+    }]
+  });
+}
+
+export function chooseDiceBet(game, bet) {
+  if (game.phase !== 'awaiting-dice-bet') {
+    return game;
+  }
+
+  if (bet !== 'low' && bet !== 'high') {
+    throw new RangeError('Dice bet must be low or high.');
+  }
+
+  const activePlayer = getActivePlayer(game);
+  if (activePlayer.gummies < 1) {
+    throw new RangeError('Dice betting requires one gummy.');
+  }
+
+  return evaluateResult({
+    ...replaceActivePlayer(game, applyGummies(activePlayer, -1)),
+    phase: 'awaiting-dice-roll',
+    pendingAction: { type: 'dice-bet', bet }
+  });
+}
+
+export function resolveDiceBet(game) {
+  if (game.phase !== 'awaiting-dice-roll' || game.pendingAction?.type !== 'dice-bet') {
+    return game;
+  }
+
+  const dice = [rollDie(game.random), rollDie(game.random)];
+  const total = dice[0] + dice[1];
+  const activePlayer = getActivePlayer(game);
+  const won = (total >= 2 && total <= 6 && game.pendingAction.bet === 'low')
+    || (total >= 8 && total <= 12 && game.pendingAction.bet === 'high');
+  const updatedPlayer = total === 7
+    ? applyGummies(activePlayer, 1)
+    : won
+      ? applyDebt(activePlayer, -200_000)
+      : activePlayer;
+
+  return finishTurn({
+    ...replaceActivePlayer(game, updatedPlayer),
+    pendingAction: null,
+    lastRoll: { dice, total },
+    log: [...game.log, { type: 'dice-bet', playerId: activePlayer.id, bet: game.pendingAction.bet, dice, total, won }]
+  });
+}
+
+export function startBlackjack(game) {
+  if (game.phase !== 'awaiting-blackjack') {
+    return game;
+  }
+
+  const activePlayer = getActivePlayer(game);
+  if (activePlayer.gummies < 1) {
+    throw new RangeError('Blackjack requires one gummy.');
+  }
+
+  const paidGame = evaluateResult({
+    ...replaceActivePlayer(game, applyGummies(activePlayer, -1))
+  });
+  if (paidGame.result !== null) {
+    return paidGame;
+  }
+
+  return {
+    ...paidGame,
+    phase: 'awaiting-blackjack-action',
+    pendingAction: {
+      type: 'blackjack',
+      playerCards: [drawBlackjackCard(game.random), drawBlackjackCard(game.random)],
+      dealerCards: [drawBlackjackCard(game.random), drawBlackjackCard(game.random)]
+    }
+  };
+}
+
+function finishBlackjack(game, playerCards, dealerCards) {
+  const playerTotal = blackjackTotal(playerCards);
+  const dealerTotal = blackjackTotal(dealerCards);
+  const activePlayer = getActivePlayer(game);
+  const updatedPlayer = playerTotal > 21 || (dealerTotal <= 21 && dealerTotal > playerTotal)
+    ? activePlayer
+    : playerTotal === dealerTotal
+      ? applyGummies(activePlayer, 1)
+      : applyDebt(activePlayer, -200_000);
+
+  return finishTurn({
+    ...replaceActivePlayer(game, updatedPlayer),
+    pendingAction: { type: 'blackjack', playerCards, dealerCards },
+    log: [...game.log, { type: 'blackjack', playerId: activePlayer.id, playerCards, dealerCards }]
+  });
+}
+
+export function blackjackHit(game) {
+  if (game.phase !== 'awaiting-blackjack-action' || game.pendingAction?.type !== 'blackjack') {
+    return game;
+  }
+
+  const playerCards = [...game.pendingAction.playerCards, drawBlackjackCard(game.random)];
+  const dealerCards = game.pendingAction.dealerCards;
+
+  return blackjackTotal(playerCards) > 21
+    ? finishBlackjack(game, playerCards, dealerCards)
+    : {
+        ...game,
+        pendingAction: { ...game.pendingAction, playerCards }
+      };
+}
+
+export function blackjackStand(game) {
+  if (game.phase !== 'awaiting-blackjack-action' || game.pendingAction?.type !== 'blackjack') {
+    return game;
+  }
+
+  const playerCards = game.pendingAction.playerCards;
+  const dealerCards = [...game.pendingAction.dealerCards];
+  while (blackjackTotal(dealerCards) < 17) {
+    dealerCards.push(drawBlackjackCard(game.random));
+  }
+
+  return finishBlackjack(game, playerCards, dealerCards);
+}
+
 export function drawEventCard(game) {
   const eventDeck = game.eventDeck.length === 0
     ? shuffleCards(game.eventDiscard, game.random)
@@ -352,7 +535,14 @@ export function drawEventCard(game) {
   }
 
   const activePlayer = getActivePlayer(game);
-  const updatedPlayer = card.type === 'debt'
+  const isRoulette = card.kind === 'debt-clear-roulette' || card.kind === 'debt-double-roulette';
+  const winningSlot = isRoulette ? Math.floor(game.random() * 100) : null;
+  const won = winningSlot === 0;
+  const updatedPlayer = card.kind === 'debt-clear-roulette' && won
+    ? { ...activePlayer, debt: 0 }
+    : card.kind === 'debt-double-roulette' && won
+      ? { ...activePlayer, debt: activePlayer.debt * 2 }
+      : card.type === 'debt'
     ? applyDebt(activePlayer, card.amount)
     : card.type === 'gummies'
       ? applyGummies(activePlayer, card.amount)
@@ -361,7 +551,7 @@ export function drawEventCard(game) {
     ...replaceActivePlayer(game, updatedPlayer),
     eventDeck: remainingDeck,
     eventDiscard: [...(game.eventDeck.length === 0 ? [] : game.eventDiscard), card],
-    log: [...game.log, { type: 'event-card', playerId: activePlayer.id, card }]
+    log: [...game.log, { type: 'event-card', playerId: activePlayer.id, card, winningSlot, won }]
   };
 
   return finishTurn(drawnGame);

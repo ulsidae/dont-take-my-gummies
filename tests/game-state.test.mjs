@@ -33,8 +33,8 @@ test('moves by two dice and awards a gummy when passing Start', () => {
 });
 
 test('routes jailed players through the jail turn instead of normal movement', () => {
-  const values = [...Array(7).fill(0.5), 0, 0.2];
-  const game = createGame({ players, random: () => values.shift() });
+  const values = [0, 0.2];
+  const game = { ...createGame({ players, random: () => 0.5 }), random: () => values.shift() };
   const jailed = { ...game, players: [{ ...game.players[0], jailed: true }, game.players[1]] };
   const resolved = rollStandardTurn(jailed);
 
@@ -99,8 +99,8 @@ test('doubles release a jailed player and move by that roll', () => {
 });
 
 test('a failed jail roll ends the turn and counts one attempt', () => {
-  const values = [...Array(7).fill(0.5), 0, 0.2];
-  const game = createGame({ players, random: () => values.shift() });
+  const values = [0, 0.2];
+  const game = { ...createGame({ players, random: () => 0.5 }), random: () => values.shift() };
   const jailed = { ...game, players: [{ ...game.players[0], jailed: true }, game.players[1]] };
   const failed = resolveJailTurn(jailed);
 
@@ -111,8 +111,8 @@ test('a failed jail roll ends the turn and counts one attempt', () => {
 });
 
 test('third failed jail attempt releases without moving', () => {
-  const values = [...Array(7).fill(0.5), 0, 0.2];
-  const game = createGame({ players, random: () => values.shift() });
+  const values = [0, 0.2];
+  const game = { ...createGame({ players, random: () => 0.5 }), random: () => values.shift() };
   const jailed = { ...game, players: [{ ...game.players[0], jailed: true, jailAttempts: 2, position: 6 }, game.players[1]] };
   const released = resolveJailTurn(jailed);
 
