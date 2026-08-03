@@ -145,6 +145,22 @@ test('World Travel rejects corners and players without a gummy', () => {
   assert.throws(() => chooseWorldTravel(noGummies, 1), RangeError);
 });
 
+test('World Travel immediately defeats a player who spends their final gummy', () => {
+  const game = createGame({ players, random: () => 0 });
+  const waiting = {
+    ...game,
+    phase: 'awaiting-world-travel',
+    players: [{ ...game.players[0], gummies: 1 }, game.players[1]]
+  };
+  const travelled = chooseWorldTravel(waiting, 1);
+
+  assert.equal(travelled.players[0].position, 1);
+  assert.equal(travelled.players[0].gummies, 0);
+  assert.equal(travelled.phase, 'game-over');
+  assert.equal(travelled.result.type, 'defeat');
+  assert.equal(travelled.pendingAction, null);
+});
+
 test('drawEventCard reshuffles the discard pile after drawing the final card', () => {
   const game = createGame({ players, random: () => 0 });
   const finalCard = { id: 'final', type: 'gummies', amount: 1 };

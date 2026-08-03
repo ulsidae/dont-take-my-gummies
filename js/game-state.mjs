@@ -317,11 +317,13 @@ export function chooseWorldTravel(game, destinationIndex) {
     gummies: activePlayer.gummies - 1
   };
 
-  return resolveTile({
+  const travelledGame = evaluateResult({
     ...replaceActivePlayer(game, travelledPlayer),
     phase: 'resolving-tile',
     pendingAction: null
   });
+
+  return travelledGame.result === null ? resolveTile(travelledGame) : travelledGame;
 }
 
 export function declineWorldTravel(game) {
