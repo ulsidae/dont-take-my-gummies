@@ -99,6 +99,115 @@ export function rollStandardTurn(game) {
   };
 }
 
+function replaceActivePlayer(game, player) {
+  return {
+    ...game,
+    players: game.players.map((currentPlayer, index) => (
+      index === game.activePlayerIndex ? player : currentPlayer
+    ))
+  };
+}
+
+function finishTurn(game) {
+  const evaluated = evaluateResult(game);
+  return evaluated.result === null ? { ...evaluated, phase: 'turn-complete' } : evaluated;
+}
+
+export function evaluateResult(game) {
+  if (game.result !== null) {
+    return game;
+  }
+
+  const activePlayer = getActivePlayer(game);
+  let type = null;
+
+  if (activePlayer.debt === 0) {
+    type = 'victory';
+  } else if (activePlayer.gummies === 0) {
+    type = 'defeat';
+  }
+
+  return type === null
+    ? game
+    : {
+        ...game,
+        phase: 'game-over',
+        pendingAction: null,
+        result: { type, playerId: activePlayer.id }
+      };
+}
+
+export function resolveTile(game) {
+  const activePlayer = getActivePlayer(game);
+  const tileIndex = activePlayer.position;
+  const tile = game.board[tileIndex];
+
+  if (tile.type === TILE_TYPES.JOB) {
+    const reward = 50_000 + Math.floor(game.random() * 100_001);
+    return finishTurn(replaceActivePlayer(game, applyDebt(activePlayer, -reward)));
+  }
+
+  if (tile.type === TILE_TYPES.TERRITORY) {
+    if (tile.ownerId === null) {
+      return {
+        ...game,
+        phase: 'awaiting-territory-choice',
+        pendingAction: { type: 'territory', tileIndex }
+      };
+    }
+
+    if (tile.ownerId !== activePlayer.id) {
+      return finishTurn(replaceActivePlayer(game, applyDebt(activePlayer, 50_000)));
+    }
+  }
+
+  return finishTurn(game);
+}
+
+export function buyTerritory(game) {
+  if (game.phase !== 'awaiting-territory-choice' || game.pendingAction?.type !== 'territory') {
+    return game;
+  }
+
+  const tileIndex = game.pendingAction.tileIndex;
+  const tile = game.board[tileIndex];
+  const activePlayer = getActivePlayer(game);
+
+  if (tile?.type !== TILE_TYPES.TERRITORY || tile.ownerId !== null) {
+    return game;
+  }
+
+  const boughtPlayer = {
+    ...applyDebt(activePlayer, 100_000),
+    territoryIds: [...activePlayer.territoryIds, tileIndex]
+  };
+  const boughtGame = {
+    ...replaceActivePlayer(game, boughtPlayer),
+    board: game.board.map((currentTile, index) => (
+      index === tileIndex ? { ...currentTile, ownerId: activePlayer.id } : currentTile
+    )),
+    pendingAction: null
+  };
+
+  return finishTurn(boughtGame);
+}
+
+export function declineTerritory(game) {
+  if (game.phase !== 'awaiting-territory-choice' || game.pendingAction?.type !== 'territory') {
+    return game;
+  }
+
+  const tileIndex = game.pendingAction.tileIndex;
+  const declinedGame = {
+    ...game,
+    phase: 'turn-complete',
+    pendingAction: null,
+    log: [...game.log, { type: 'territory-declined', playerId: getActivePlayer(game).id, tileIndex }]
+  };
+
+  return evaluateResult(declinedGame);
+}
+
 export function advanceTurn(game) {
   if (game.result !== null || game.phase !== 'turn-complete') {
     return game;
