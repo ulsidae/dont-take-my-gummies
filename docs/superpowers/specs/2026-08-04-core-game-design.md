@@ -46,9 +46,7 @@ The board is a 24-tile square perimeter, with six tiles on each side. The center
 | Job | 4 | Reduce Debt by a random ₩50,000-₩150,000. |
 | Blackjack | 2 | Spend 1 gummy to play blackjack for a Debt reduction. |
 | Roll-the-Dice | 2 | Spend 1 gummy to predict a two-dice total for a Debt reduction. |
-| Event Card | 2 | Draw one ordinary positive/negative event. |
-| Debt-Clear Roulette | 1 | A 1-in-100 result sets Debt to ₩0; all other results do nothing. |
-| Debt-Double Roulette | 1 | A 1-in-100 result doubles current Debt; all other results do nothing. |
+| Event Card | 4 | Draw one positive, negative, or rare extreme event. |
 | **Total** | **24** | |
 
 Corner tiles occupy the four board corners: Start, Jail, Mafia, and World Travel.
@@ -110,12 +108,12 @@ Present three cups. The player chooses one cup. The correct cup has no effect; e
 
 ### Ordinary event cards
 
-The two Event Card tiles draw from one shared shuffled deck. The MVP deck contains four positive and four negative cards, using only changes of 1 gummy or ₩50,000-₩150,000 Debt. Reshuffle the discard pile when the deck becomes empty.
+The four Event Card tiles draw from one shared shuffled deck. The MVP deck contains four positive cards, four negative cards, and two rare extreme cards. Ordinary cards use only changes of 1 gummy or ₩50,000-₩150,000 Debt. Reshuffle the discard pile when the deck becomes empty.
 
-### Extreme roulette tiles
+### Rare extreme event cards
 
-- **Debt-Clear Roulette:** create 100 equal outcome slots. One slot wins, setting current Debt to ₩0; the other 99 end the turn unchanged.
-- **Debt-Double Roulette:** create 100 equal outcome slots. One slot doubles current Debt; the other 99 end the turn unchanged.
+- **Debt-Clear Roulette:** after this rare card is drawn, create 100 equal outcome slots. One slot wins, setting current Debt to ₩0; the other 99 end the turn unchanged.
+- **Debt-Double Roulette:** after this rare card is drawn, create 100 equal outcome slots. One slot doubles current Debt; the other 99 end the turn unchanged.
 - Display the chance clearly and resolve from the exact generated outcome list so the animation and game result agree.
 
 ## State model
@@ -137,7 +135,7 @@ The MVP game screen includes:
 - a 2-4 player setup screen using the current colored character images;
 - the 24-tile square board with visible player markers and territory ownership;
 - a center panel for active player, Debt, gummies, jail status, dice, and roll control;
-- focused overlays/panels for purchase decisions, card draws, Blackjack, Roll-the-Dice, Mafia, World Travel, and extreme roulette results;
+- focused overlays/panels for purchase decisions, card draws, rare extreme roulette results, Blackjack, Roll-the-Dice, Mafia, and World Travel;
 - an activity log and an end-game victory/defeat screen.
 
 Use names, colors, and simple symbols as placeholders. UI components consume image/avatar fields from the player data so the designer can later provide final character and entity art without rewriting game mechanics.
@@ -162,8 +160,8 @@ Automated tests should cover:
 - all jail paths, including doubles and third failed attempt;
 - World Travel validation, gummy spending, and destination resolution;
 - Blackjack outcomes, dice-game high/low and seven outcomes, and Mafia outcomes;
-- ordinary-card deck draw/discard/reshuffle behavior;
-- 1-in-100 extreme roulette outcomes and unchanged outcomes;
+- ordinary-card deck draw/discard/reshuffle behavior, including rare extreme-card draws;
+- 1-in-100 rare extreme roulette outcomes and unchanged outcomes;
 - insufficient-gummy handling; and
 - immediate victory and defeat evaluation after every relevant state change.
 
