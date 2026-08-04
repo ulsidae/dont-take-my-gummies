@@ -141,6 +141,19 @@ test('settings disables the French language control during initialization', asyn
   assert.equal(frenchControl.disabled, true);
 });
 
+test('settings markup keeps the French control visible and unavailable', async () => {
+  const settingsMarkup = await readFile(new URL('../settings.html', import.meta.url), 'utf8');
+
+  assert.match(
+    settingsMarkup,
+    /<button\b(?=[^>]*data-language-option="fr")(?=[^>]*\bdisabled\b)[^>]*>/
+  );
+  assert.match(
+    settingsMarkup,
+    /<button\b[^>]*data-language-option="fr"[^>]*>[\s\S]*?<span\s+data-lang="comingSoon">/
+  );
+});
+
 test('dynamic turn feedback is rendered from the selected dictionary', async () => {
   const originalDocument = globalThis.document;
   const root = new FakeElement('main');
