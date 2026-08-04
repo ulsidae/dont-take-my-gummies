@@ -189,27 +189,14 @@ test('dynamic turn feedback is rendered from the selected dictionary', async () 
   }
 });
 
-test('game HUD assigns players to arcade corners and emphasizes the active player', () => {
+test('game HUD maps two and four players to arcade corners and emphasizes the active player', () => {
   const originalDocument = globalThis.document;
   const root = new FakeElement('main');
   globalThis.document = { createElement: (tagName) => new FakeElement(tagName) };
 
   try {
-    const game = createGame({
-      players: [
-        ...players,
-        { id: 'blue', name: 'Blue', avatar: 'img/cha_b.png', color: '#5b9ff0' },
-        { id: 'yellow', name: 'Sunny', avatar: 'img/cha_y.png', color: '#f4c542' }
-      ],
-      random: () => 0
-    });
-    const activeGame = {
-      ...game,
-      activePlayerIndex: 2,
-      players: game.players.map((player, index) => ({ ...player, jailed: index === 1 }))
-    };
-
-    renderGame(root, activeGame, {}, {
+    const game = createGame({ players, random: () => 0 });
+    const messages = {
       debt: 'Debt',
       gummies: 'Gummies',
       jailed: 'Jailed',
@@ -224,7 +211,30 @@ test('game HUD assigns players to arcade corners and emphasizes the active playe
       activityEmpty: 'No activity',
       outcomeDefault: 'Waiting',
       playerStatus: '{name}: {debt} {money} · {gummies} {count}'
+    };
+
+    renderGame(root, game, {}, messages);
+    const twoPlayerSlots = descendants(root, (element) => element.dataset.playerSlot);
+    assert.deepEqual(
+      twoPlayerSlots.map((slot) => [slot.dataset.playerSlot, slot.dataset.playerId]),
+      [['top-left', 'red'], ['bottom-right', 'green']]
+    );
+
+    const fourPlayerGame = createGame({
+      players: [
+        ...players,
+        { id: 'blue', name: 'Blue', avatar: 'img/cha_b.png', color: '#5b9ff0' },
+        { id: 'yellow', name: 'Sunny', avatar: 'img/cha_y.png', color: '#f4c542' }
+      ],
+      random: () => 0
     });
+    const activeGame = {
+      ...fourPlayerGame,
+      activePlayerIndex: 2,
+      players: fourPlayerGame.players.map((player, index) => ({ ...player, jailed: index === 1 }))
+    };
+
+    renderGame(root, activeGame, {}, messages);
 
     const slots = descendants(root, (element) => element.dataset.playerSlot);
     assert.deepEqual(
