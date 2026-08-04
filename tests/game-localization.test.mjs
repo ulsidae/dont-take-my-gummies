@@ -38,6 +38,14 @@ function allText(element) {
   ))].filter(Boolean).join(' ');
 }
 
+function descendants(element, predicate) {
+  return element.children.flatMap((child) => (
+    child instanceof FakeElement
+      ? [child, ...descendants(child, predicate)]
+      : []
+  )).filter(predicate);
+}
+
 async function readDictionary(language) {
   return JSON.parse(await readFile(new URL(`../public/lang/${language}.json`, import.meta.url), 'utf8'));
 }
@@ -173,6 +181,62 @@ test('dynamic turn feedback is rendered from the selected dictionary', async () 
     assert.match(text, /Tour terminé/);
     assert.match(text, /Ruby a gagné ₩50[  ]000 grâce à son travail\./);
     assert.doesNotMatch(text, /Turn complete|completed an action/);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('game HUD assigns players to arcade corners and emphasizes the active player', () => {
+  const originalDocument = globalThis.document;
+  const root = new FakeElement('main');
+  globalThis.document = { createElement: (tagName) => new FakeElement(tagName) };
+
+  try {
+    const game = createGame({
+      players: [
+        ...players,
+        { id: 'blue', name: 'Blue', avatar: 'img/cha_b.png', color: '#5b9ff0' },
+        { id: 'yellow', name: 'Sunny', avatar: 'img/cha_y.png', color: '#f4c542' }
+      ],
+      random: () => 0
+    });
+    const activeGame = {
+      ...game,
+      activePlayerIndex: 2,
+      players: game.players.map((player, index) => ({ ...player, jailed: index === 1 }))
+    };
+
+    renderGame(root, activeGame, {}, {
+      debt: 'Debt',
+      gummies: 'Gummies',
+      jailed: 'Jailed',
+      gameBoard: 'Game board',
+      activePlayerPhase: '{name} {phase}',
+      'phase_awaiting-roll': 'awaiting roll',
+      diceTotal: 'Total {total}',
+      turnTitle: '{name} turn',
+      rollMessage: 'Roll',
+      rollDice: 'Roll dice',
+      recentActivity: 'Recent activity',
+      activityEmpty: 'No activity',
+      outcomeDefault: 'Waiting',
+      playerStatus: '{name}: {debt} {money} · {gummies} {count}'
+    });
+
+    const slots = descendants(root, (element) => element.dataset.playerSlot);
+    assert.deepEqual(
+      slots.map((slot) => [slot.dataset.playerSlot, slot.dataset.playerId]),
+      [
+        ['top-left', 'red'],
+        ['bottom-right', 'green'],
+        ['top-right', 'blue'],
+        ['bottom-left', 'yellow']
+      ]
+    );
+    assert.match(slots[2].className, /arcade-hud__slot--active/);
+    assert.doesNotMatch(slots[0].className, /arcade-hud__slot--active/);
+    assert.match(allText(slots[0]), /Ruby.*Debt.*Gummies/);
+    assert.match(allText(slots[1]), /Mint.*Jailed/);
   } finally {
     globalThis.document = originalDocument;
   }

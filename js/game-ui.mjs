@@ -7,6 +7,13 @@ const DEFAULT_CHARACTERS = Object.freeze([
   { id: 'yellow', name: 'Sunny', avatar: 'img/cha_y.png', color: '#f4c542' }
 ]);
 
+const HUD_CORNER_SLOTS = Object.freeze([
+  'top-left',
+  'bottom-right',
+  'top-right',
+  'bottom-left'
+]);
+
 const TILE_DETAILS = Object.freeze({
   [TILE_TYPES.START]: { labelKey: 'tileStart', symbol: '★' },
   [TILE_TYPES.JAIL]: { labelKey: 'jail', symbol: '⛓' },
@@ -120,27 +127,43 @@ function renderTile(tile, game, messages) {
   return tileElement;
 }
 
-function renderPlayerStatus(game, messages, language) {
-  const list = makeElement('ul', 'player-status-list');
-  game.players.forEach((player, index) => {
-    const item = makeElement('li', `player-status${index === game.activePlayerIndex ? ' player-status--active' : ''}`);
-    item.style.setProperty('--player-color', player.color || '#ffffff');
-    item.append(renderMarker(player, messages));
+function renderArcadeHud(game, messages, language) {
+  const hud = makeElement('aside', 'arcade-hud');
+  hud.setAttribute('aria-label', translate(messages, 'activePlayer'));
 
-    const status = makeElement('span', 'player-status__text');
-    status.textContent = translate(messages, 'playerStatus', {
+  game.players.slice(0, HUD_CORNER_SLOTS.length).forEach((player, index) => {
+    const corner = HUD_CORNER_SLOTS[index];
+    const slot = makeElement(
+      'section',
+      `arcade-hud__slot arcade-hud__slot--${corner}${index === game.activePlayerIndex ? ' arcade-hud__slot--active' : ''}`
+    );
+    slot.dataset.playerSlot = corner;
+    slot.dataset.playerId = player.id;
+    slot.style.setProperty('--player-color', player.color || '#ffffff');
+    slot.setAttribute('aria-label', translate(messages, 'playerStatus', {
       name: player.name,
       debt: translate(messages, 'debt'),
       money: formatMoney(player.debt, language),
       gummies: translate(messages, 'gummies'),
       count: player.gummies
-    });
-    item.append(status);
+    }));
+    slot.append(renderMarker(player, messages));
 
-    if (player.jailed) item.append(makeElement('span', 'player-status__jail', translate(messages, 'jailed')));
-    list.append(item);
+    const details = makeElement('div', 'arcade-hud__details');
+    details.append(makeElement('strong', 'arcade-hud__name', player.name));
+    details.append(makeElement('span', 'arcade-hud__stats', translate(messages, 'playerStatus', {
+      name: '',
+      debt: translate(messages, 'debt'),
+      money: formatMoney(player.debt, language),
+      gummies: translate(messages, 'gummies'),
+      count: player.gummies
+    }).replace(/^\s*:\s*/, '')));
+    if (player.jailed) details.append(makeElement('span', 'arcade-hud__jail', translate(messages, 'jailed')));
+    slot.append(details);
+    hud.append(slot);
   });
-  return list;
+
+  return hud;
 }
 
 function describeLogEntry(entry, game, messages, language) {
@@ -360,13 +383,12 @@ export function renderGame(root, game, handlers = {}, messages = {}, language = 
     name: activePlayer.name,
     phase: translate(messages, `phase_${game.phase}`)
   })));
-  center.append(renderPlayerStatus(game, messages, language));
   center.append(renderDice(game.lastRoll, messages));
   center.append(renderActionPanel(game, handlers, messages, language));
   center.append(renderLog(game, messages, language));
   board.append(center);
 
-  shell.append(board);
+  shell.append(board, renderArcadeHud(game, messages, language));
   const resultOverlay = renderResultOverlay(game, messages);
   if (resultOverlay) shell.append(resultOverlay);
   root.append(shell);

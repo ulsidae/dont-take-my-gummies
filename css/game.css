@@ -3,9 +3,13 @@
   --player-green: #54c99b;
   --player-blue: #5b9ff0;
   --player-yellow: #f4c542;
+  --arcade-bg: #12151c;
+  --arcade-surface: #202633;
+  --arcade-surface-strong: #171c27;
+  --arcade-accent: #ffe27a;
   --ink: #f9f4ff;
   --muted: #c9c0d8;
-  --panel: rgba(28, 20, 46, 0.94);
+  --panel: #202633;
   --line: rgba(255, 255, 255, 0.18);
   --shadow: 0 18px 48px rgba(6, 2, 15, 0.45);
 }
@@ -14,11 +18,10 @@
 
 html, body, #game-root { min-height: 100%; margin: 0; }
 
-body {
+body.arcade-page {
   color: var(--ink);
   font-family: Arial, "Noto Sans KR", sans-serif;
-  background: radial-gradient(circle at 20% 15%, #554176 0, transparent 34%),
-    radial-gradient(circle at 85% 90%, #376f70 0, transparent 30%), #17101f;
+  background: var(--arcade-bg);
 }
 
 button, select { font: inherit; }
@@ -33,7 +36,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 }
 
 .board {
-  width: min(96vw, 94dvh, 940px);
+  width: min(64vw, 84dvh, 940px);
   aspect-ratio: 1;
   display: grid;
   grid-template: repeat(7, minmax(0, 1fr)) / repeat(7, minmax(0, 1fr));
@@ -41,7 +44,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   padding: clamp(4px, 0.8vw, 10px);
   border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: clamp(16px, 3vw, 34px);
-  background: rgba(13, 8, 25, 0.76);
+  background: var(--arcade-surface-strong);
   box-shadow: var(--shadow);
 }
 
@@ -56,15 +59,15 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   padding: clamp(3px, 0.7vw, 9px);
   border: 1px solid var(--line);
   border-radius: clamp(7px, 1.2vw, 13px);
-  background: #322447;
+  background: #2c3445;
   color: var(--ink);
 }
 
-.tile--territory { background: linear-gradient(145deg, #3d2961, #293153); }
-.tile--job { background: linear-gradient(145deg, #20465a, #27355a); }
-.tile--event { background: linear-gradient(145deg, #613252, #402553); }
-.tile--corner { align-content: center; justify-items: center; text-align: center; border-color: rgba(255, 220, 123, 0.65); background: linear-gradient(145deg, #77502b, #472e5d); }
-.tile--blackjack, .tile--dice-game { background: linear-gradient(145deg, #5a3149, #322342); }
+.tile--territory { background: #34315a; }
+.tile--job { background: #24495c; }
+.tile--event { background: #573451; }
+.tile--corner { align-content: center; justify-items: center; text-align: center; border-color: rgba(255, 220, 123, 0.65); background: #694a33; }
+.tile--blackjack, .tile--dice-game { background: #56354d; }
 
 .tile__symbol { color: #ffe27a; font-size: clamp(12px, 1.7vw, 23px); line-height: 1; }
 .tile__label { overflow: hidden; font-size: clamp(7px, 1.05vw, 13px); font-weight: 700; line-height: 1.08; text-overflow: ellipsis; }
@@ -102,11 +105,31 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 
 .board-center__eyebrow, .setup-screen__eyebrow, .result-overlay__eyebrow { margin: 0; color: #ffe27a; font-size: clamp(9px, 1.2vw, 13px); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 
-.player-status-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; list-style: none; }
-.player-status { min-width: 0; display: flex; align-items: center; gap: 5px; padding: 4px; border-left: 3px solid var(--player-color); border-radius: 6px; background: rgba(255, 255, 255, 0.055); }
-.player-status--active { background: color-mix(in srgb, var(--player-color) 23%, transparent); }
-.player-status__text { min-width: 0; overflow: hidden; font-size: clamp(8px, 1vw, 12px); line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
-.player-status__jail { margin-left: auto; color: #ffb8b8; font-size: 9px; font-weight: 700; }
+.arcade-hud { pointer-events: none; }
+.arcade-hud__slot {
+  position: fixed;
+  z-index: 4;
+  width: min(250px, 18vw);
+  min-width: 142px;
+  display: flex;
+  align-items: center;
+  gap: clamp(5px, 0.7vw, 9px);
+  padding: clamp(5px, 0.8vw, 10px);
+  border: 2px solid var(--player-color);
+  border-radius: 10px;
+  background: var(--arcade-surface);
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.28);
+}
+.arcade-hud__slot--top-left { top: clamp(10px, 2vw, 28px); left: clamp(10px, 2vw, 28px); }
+.arcade-hud__slot--bottom-right { right: clamp(10px, 2vw, 28px); bottom: clamp(10px, 2vw, 28px); }
+.arcade-hud__slot--top-right { top: clamp(10px, 2vw, 28px); right: clamp(10px, 2vw, 28px); }
+.arcade-hud__slot--bottom-left { bottom: clamp(10px, 2vw, 28px); left: clamp(10px, 2vw, 28px); }
+.arcade-hud__slot--active { border-color: var(--arcade-accent); box-shadow: 0 0 0 3px var(--player-color), 0 7px 0 rgba(0, 0, 0, 0.28); }
+.arcade-hud__details { min-width: 0; display: grid; gap: 2px; }
+.arcade-hud__name, .arcade-hud__stats { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arcade-hud__name { color: var(--ink); font-size: clamp(11px, 1.25vw, 15px); }
+.arcade-hud__stats { color: var(--muted); font-size: clamp(8px, 0.9vw, 11px); font-weight: 700; }
+.arcade-hud__jail { width: max-content; padding: 1px 4px; border-radius: 3px; background: #9d4555; color: #fff2f2; font-size: clamp(8px, 0.8vw, 10px); font-weight: 800; text-transform: uppercase; }
 
 .dice { display: flex; align-items: center; gap: 6px; }
 .die { width: clamp(25px, 3vw, 37px); aspect-ratio: 1; display: grid; place-items: center; border-radius: 8px; background: #f8f4ff; color: #291a3b; font-size: clamp(14px, 2vw, 23px); font-weight: 900; box-shadow: 0 3px 0 #a994c8; }
@@ -152,19 +175,24 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 .setup-screen__start { margin-top: 20px; padding: 12px 20px; font-size: clamp(14px, 1.8vw, 18px); }
 
 @media (max-width: 600px) {
-  .board { width: min(98vw, 92dvh); border-radius: 14px; }
+  .game-shell { align-content: center; padding: 68px 6px; }
+  .board { width: min(96vw, calc(100dvh - 136px)); border-radius: 14px; }
   .board-center { gap: 5px; padding: 7px; }
-  .player-status-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
-  .player-status { gap: 3px; padding: 3px; }
-  .player-status__text { font-size: 7px; }
   .player-marker { width: 17px; }
+  .arcade-hud__slot { width: calc(50vw - 12px); min-width: 0; min-height: 54px; gap: 4px; padding: 4px; border-radius: 7px; }
+  .arcade-hud__slot--top-left, .arcade-hud__slot--top-right { top: 6px; }
+  .arcade-hud__slot--bottom-left, .arcade-hud__slot--bottom-right { bottom: 6px; }
+  .arcade-hud__slot--top-left, .arcade-hud__slot--bottom-left { left: 6px; }
+  .arcade-hud__slot--top-right, .arcade-hud__slot--bottom-right { right: 6px; }
+  .arcade-hud__name { font-size: 10px; }
+  .arcade-hud__stats, .arcade-hud__jail { font-size: 7px; }
   .tile__owner { display: none; }
   .activity__list { max-height: 44px; font-size: 7px; }
   .character-grid { grid-template-columns: repeat(2, minmax(0, 150px)); }
 }
 
 @media (max-height: 620px) and (orientation: landscape) {
-  .board { width: min(96vw, 94dvh); }
+  .board { width: min(72vw, calc(100dvh - 24px)); }
   .activity__list { max-height: 34px; }
   .action-panel__message { margin-block: 2px 5px; }
 }
