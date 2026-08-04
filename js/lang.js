@@ -1,10 +1,17 @@
 async function applyLanguage(){
 
 
+const savedLanguage =
+localStorage.getItem("lang");
+
+
+
 const lang =
-localStorage.getItem("lang")
+savedLanguage === "en"
 ||
-"en";
+savedLanguage === "ko"
+? savedLanguage
+: "ko";
 
 
 const res =
@@ -15,6 +22,10 @@ await fetch(
 
 const data =
 await res.json();
+
+
+
+document.documentElement.lang=lang;
 
 
 

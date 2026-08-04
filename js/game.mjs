@@ -18,9 +18,9 @@ import {
 import { renderGame, renderSetup } from './game-ui.mjs';
 
 const root = document.querySelector('#game-root');
-const supportedLanguages = new Set(['en', 'ko', 'fr']);
+const supportedLanguages = new Set(['en', 'ko']);
 const savedLanguage = globalThis.localStorage?.getItem('lang');
-let language = supportedLanguages.has(savedLanguage) ? savedLanguage : 'en';
+let language = supportedLanguages.has(savedLanguage) ? savedLanguage : 'ko';
 
 async function fetchMessages(selectedLanguage) {
   const response = await fetch(`public/lang/${selectedLanguage}.json`);
@@ -33,7 +33,7 @@ try {
   messages = await fetchMessages(language);
 } catch (error) {
   console.error('Game language load failed', error);
-  language = 'en';
+  language = 'ko';
   messages = await fetchMessages(language);
 }
 
