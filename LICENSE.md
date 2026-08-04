@@ -9,7 +9,7 @@
 | 🇺🇸 English | [English License](#English-license) |
 | 🇰🇷 한국어 | [한국어 라이선스](#Korean-license) |
 
-This project is provided under a custom license created specifically for **Pas touche à mes bonbons !***  
+This project is provided under a custom license created specifically for **Pas touche à mes bonbons !**
 (본 프로젝트는「Pas touche à mes bonbons !」를 위해 작성된 프로젝트 전용 커스텀 라이선스에 따라 제공됩니다.)
 
 Team Regidit consists of the contributors who contributed to the development of this project.
