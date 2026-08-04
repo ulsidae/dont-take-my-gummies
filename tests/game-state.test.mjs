@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  advanceTurn,
   buyTerritory,
   chooseWorldTravel,
   createGame,
@@ -21,6 +22,11 @@ test('creates two players with approved starting resources', () => {
   assert.equal(game.players[0].debt, 1_000_000);
   assert.equal(game.players[0].gummies, 3);
   assert.equal(game.board.length, 24);
+});
+
+test('rejects player counts outside the supported two-to-four range', () => {
+  assert.throws(() => createGame({ players: players.slice(0, 1) }), RangeError);
+  assert.throws(() => createGame({ players: [...players, { id: 'blue' }, { id: 'yellow' }, { id: 'purple' }] }), RangeError);
 });
 
 test('moves by two dice and awards a gummy when passing Start', () => {
@@ -86,6 +92,17 @@ test('declares victory at zero debt and defeat at zero gummies', () => {
 
   assert.equal(resolveTile(jobLanding).result.type, 'victory');
   assert.equal(evaluateResult(noGummies).result.type, 'defeat');
+});
+
+test('does not advance after a game result is recorded', () => {
+  const game = createGame({ players, random: () => 0 });
+  const finished = {
+    ...game,
+    phase: 'game-over',
+    result: { type: 'victory', playerId: 'red' }
+  };
+
+  assert.equal(advanceTurn(finished), finished);
 });
 
 test('doubles release a jailed player and move by that roll', () => {

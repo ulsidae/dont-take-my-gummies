@@ -6,5 +6,21 @@
 
 "settings":"Settings",
 "language":"Language",
-"volume":"Volume"
+"volume":"Volume",
+"setup":"Setup",
+"playerCount":"Players",
+"startGame":"Start Game",
+"rollDice":"Roll Dice",
+"debt":"Debt",
+"gummies":"Gummies",
+"buy":"Buy",
+"decline":"Decline",
+"jail":"Jail",
+"worldTravel":"World Travel",
+"blackjack":"Blackjack",
+"high":"High",
+"low":"Low",
+"victory":"Victory",
+"defeat":"Defeat",
+"nextTurn":"Next Turn"
 }

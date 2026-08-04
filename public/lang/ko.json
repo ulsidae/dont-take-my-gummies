@@ -6,5 +6,21 @@
     "settings":"설정",
     "language":"언어",
     "volume":"볼륨",
-    "back":"← 뒤로"
+    "back":"← 뒤로",
+    "setup":"설정",
+    "playerCount":"플레이어 수",
+    "startGame":"게임 시작",
+    "rollDice":"주사위 굴리기",
+    "debt":"빚",
+    "gummies":"젤리",
+    "buy":"구매",
+    "decline":"거절",
+    "jail":"감옥",
+    "worldTravel":"세계 여행",
+    "blackjack":"블랙잭",
+    "high":"높음",
+    "low":"낮음",
+    "victory":"승리",
+    "defeat":"패배",
+    "nextTurn":"다음 차례"
 }

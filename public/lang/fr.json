@@ -6,5 +6,21 @@
     "settings":"Paramètres",
     "language":"Langue",
     "volume":"Volume",
-    "back":"← Retour"
+    "back":"← Retour",
+    "setup":"Configuration",
+    "playerCount":"Joueurs",
+    "startGame":"Commencer la partie",
+    "rollDice":"Lancer les dés",
+    "debt":"Dette",
+    "gummies":"Bonbons",
+    "buy":"Acheter",
+    "decline":"Refuser",
+    "jail":"Prison",
+    "worldTravel":"Voyage autour du monde",
+    "blackjack":"Blackjack",
+    "high":"Haut",
+    "low":"Bas",
+    "victory":"Victoire",
+    "defeat":"Défaite",
+    "nextTurn":"Tour suivant"
 }

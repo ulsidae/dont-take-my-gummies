@@ -82,6 +82,17 @@ test('dice bets require a valid side and one gummy', () => {
   assert.throws(() => chooseDiceBet(noGummies, 'low'), RangeError);
 });
 
+test('a player without gummies cannot start Blackjack', () => {
+  const game = createGame({ players, random: () => 0 });
+  const noGummies = {
+    ...game,
+    phase: 'awaiting-blackjack',
+    players: [{ ...game.players[0], gummies: 0 }, game.players[1]]
+  };
+
+  assert.throws(() => startBlackjack(noGummies), RangeError);
+});
+
 test('Blackjack dealer draws below 17 and a player win reduces Debt', () => {
   const game = withRandom(createGame({ players, random: () => 0 }), [0.9, 0.7, 0.9, 0.4, 0.1]);
   const started = startBlackjack({ ...game, phase: 'awaiting-blackjack' });
