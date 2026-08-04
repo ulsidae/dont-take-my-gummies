@@ -12,6 +12,9 @@
 This project is provided under a custom license created specifically for **Pas touche à mes bonbons !***  
 (본 프로젝트는 **「Pas touche à mes bonbons !」를 위해 작성된 프로젝트 전용 커스텀 라이선스에 따라 제공됩니다.)
 
+Team Regidit consists of the contributors who contributed to the development of this project.
+(Team Regidit은 본 프로젝트 개발에 참여한 기여자로 구성됩니다.)
+
 For details, please read the full license below.
 (자세한 내용은 아래 라이선스 전문을 확인해주세요.)
 
