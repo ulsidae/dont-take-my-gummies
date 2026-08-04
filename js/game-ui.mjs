@@ -292,7 +292,7 @@ function renderResultOverlay(game) {
   overlay.append(makeElement('p', 'result-overlay__eyebrow', won ? 'Debt cleared' : 'Out of gummies'));
   overlay.append(makeElement('h1', '', won ? 'Victory!' : 'Defeat'));
   overlay.append(makeElement('p', '', won
-    ? `${player?.name || 'The active player'} has paid off every last won.`
+    ? `${player?.name || 'The active player'} has paid off every last bit of Debt.`
     : `${player?.name || 'The active player'} has no gummies left to continue.`));
   return overlay;
 }
@@ -310,7 +310,8 @@ export function renderGame(root, game, handlers = {}) {
   game.board.forEach((tile) => board.append(renderTile(tile, game)));
 
   const center = makeElement('section', 'board-center');
-  center.append(makeElement('p', 'board-center__eyebrow', `Turn ${game.activePlayerIndex + 1} · ${game.phase.replaceAll('-', ' ')}`));
+  const activePlayer = game.players[game.activePlayerIndex];
+  center.append(makeElement('p', 'board-center__eyebrow', `Active player: ${activePlayer.name} · ${game.phase.replaceAll('-', ' ')}`));
   center.append(renderPlayerStatus(game));
   center.append(renderDice(game.lastRoll));
   center.append(renderActionPanel(game, handlers));
@@ -359,7 +360,7 @@ export function renderSetup(root, characters = DEFAULT_CHARACTERS, onStart = () 
     const selected = selectedIds.includes(character.id);
     const card = makeButton('', `character-card${selected ? ' character-card--selected' : ''}`, () => {
       if (selected) {
-        if (selectedIds.length > 2) selectedIds = selectedIds.filter((id) => id !== character.id);
+        selectedIds = selectedIds.filter((id) => id !== character.id);
       } else if (selectedIds.length < playerCount) {
         selectedIds = [...selectedIds, character.id];
       }
@@ -412,7 +413,7 @@ function renderSetupWithSelection(root, characters, onStart, playerCount, select
     const selected = selectedIds.includes(character.id);
     const card = makeButton('', `character-card${selected ? ' character-card--selected' : ''}`, () => {
       const nextSelection = selected
-        ? selectedIds.length > 2 ? selectedIds.filter((id) => id !== character.id) : selectedIds
+        ? selectedIds.filter((id) => id !== character.id)
         : selectedIds.length < playerCount ? [...selectedIds, character.id] : selectedIds;
       renderSetupWithSelection(root, characters, onStart, playerCount, nextSelection);
     });

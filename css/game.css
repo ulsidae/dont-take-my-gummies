@@ -154,16 +154,17 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 @media (max-width: 600px) {
   .board { width: min(98vw, 92dvh); border-radius: 14px; }
   .board-center { gap: 5px; padding: 7px; }
-  .player-status-list { grid-template-columns: 1fr; }
-  .player-status:not(.player-status--active) { display: none; }
+  .player-status-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
+  .player-status { gap: 3px; padding: 3px; }
+  .player-status__text { font-size: 7px; }
   .player-marker { width: 17px; }
   .tile__owner { display: none; }
-  .activity { display: none; }
+  .activity__list { max-height: 44px; font-size: 7px; }
   .character-grid { grid-template-columns: repeat(2, minmax(0, 150px)); }
 }
 
 @media (max-height: 620px) and (orientation: landscape) {
   .board { width: min(96vw, 94dvh); }
-  .activity { display: none; }
+  .activity__list { max-height: 34px; }
   .action-panel__message { margin-block: 2px 5px; }
 }
