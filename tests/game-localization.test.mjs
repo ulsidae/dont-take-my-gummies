@@ -15,6 +15,7 @@ class FakeElement {
     this.tagName = tagName;
     this.children = [];
     this.dataset = {};
+    this.attributes = {};
     this.style = { setProperty() {} };
     this.classList = { add() {} };
     this.textContent = '';
@@ -28,7 +29,9 @@ class FakeElement {
     this.children = [...children];
   }
 
-  setAttribute() {}
+  setAttribute(name, value) {
+    this.attributes[name] = String(value);
+  }
   addEventListener() {}
 }
 
@@ -237,6 +240,46 @@ test('game HUD assigns players to arcade corners and emphasizes the active playe
     assert.doesNotMatch(slots[0].className, /arcade-hud__slot--active/);
     assert.match(allText(slots[0]), /Ruby.*Debt.*Gummies/);
     assert.match(allText(slots[1]), /Mint.*Jailed/);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
+test('owned tiles announce their owner alongside the visible owner indicator', () => {
+  const originalDocument = globalThis.document;
+  const root = new FakeElement('main');
+  globalThis.document = { createElement: (tagName) => new FakeElement(tagName) };
+
+  try {
+    const game = createGame({ players, random: () => 0 });
+    const ownedGame = {
+      ...game,
+      board: game.board.map((tile) => tile.index === 2 ? { ...tile, ownerId: 'red' } : tile)
+    };
+
+    renderGame(root, ownedGame, {}, {
+      gameBoard: 'Game board',
+      tileJob: 'Job',
+      tileAria: '{label} tile {number}',
+      ownedBy: 'Owned by {name}',
+      markerAria: '{name} marker',
+      activePlayer: 'Active player',
+      activePlayerPhase: '{name} {phase}',
+      'phase_awaiting-roll': 'awaiting roll',
+      diceTotal: 'Total {total}',
+      turnTitle: '{name} turn',
+      rollMessage: 'Roll',
+      rollDice: 'Roll dice',
+      recentActivity: 'Recent activity',
+      activityEmpty: 'No activity',
+      debt: 'Debt',
+      gummies: 'Gummies',
+      playerStatus: '{name}: {debt} {money} · {gummies} {count}'
+    });
+
+    const ownedTile = descendants(root, (element) => element.dataset.tileIndex === '2')[0];
+    assert.match(allText(ownedTile), /Owned by Ruby/);
+    assert.match(ownedTile.attributes['aria-label'], /Owned by Ruby/);
   } finally {
     globalThis.document = originalDocument;
   }

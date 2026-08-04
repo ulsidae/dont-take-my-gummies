@@ -98,22 +98,28 @@ function renderTile(tile, game, messages) {
   const labelText = translate(messages, details.labelKey);
   const tileElement = makeElement('section', tileClassName(tile));
   const { row, column } = tilePosition(tile.index);
+  const owner = tile.ownerId ? playerById(game, tile.ownerId) : null;
+  const ownerText = tile.ownerId
+    ? owner
+      ? translate(messages, 'ownedBy', { name: owner.name })
+      : translate(messages, 'owned')
+    : '';
   tileElement.style.gridRow = String(row);
   tileElement.style.gridColumn = String(column);
   tileElement.dataset.tileIndex = String(tile.index);
-  tileElement.setAttribute('aria-label', translate(messages, 'tileAria', { label: labelText, number: tile.index + 1 }));
+  tileElement.setAttribute('aria-label', [
+    translate(messages, 'tileAria', { label: labelText, number: tile.index + 1 }),
+    ownerText
+  ].filter(Boolean).join('. '));
 
   const label = makeElement('span', 'tile__label', labelText);
   const symbol = makeElement('span', 'tile__symbol', details.symbol);
   tileElement.append(symbol, label);
 
   if (tile.ownerId) {
-    const owner = playerById(game, tile.ownerId);
     const ownerIndicator = makeElement('span', 'tile__owner');
     ownerIndicator.style.setProperty('--owner-color', owner?.color || '#ffffff');
-    ownerIndicator.textContent = owner
-      ? translate(messages, 'ownedBy', { name: owner.name })
-      : translate(messages, 'owned');
+    ownerIndicator.textContent = ownerText;
     tileElement.append(ownerIndicator);
   }
 

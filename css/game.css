@@ -186,7 +186,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   .arcade-hud__slot--top-right, .arcade-hud__slot--bottom-right { right: 6px; }
   .arcade-hud__name { font-size: 10px; }
   .arcade-hud__stats, .arcade-hud__jail { font-size: 7px; }
-  .tile__owner { display: none; }
+  .tile__owner { display: block; padding: 1px 2px; border-left-width: 2px; font-size: 5px; }
   .activity__list { max-height: 44px; font-size: 7px; }
   .character-grid { grid-template-columns: repeat(2, minmax(0, 150px)); }
 }
