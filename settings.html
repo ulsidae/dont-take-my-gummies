@@ -13,11 +13,16 @@ content="width=device-width, initial-scale=1.0">
 Settings
 </title>
 
+<link rel="icon" href="public/icon.png">
+
 <script src="js/lang.js"></script>
 
-<script>
-applyLanguage();
-</script>
+<!--
+<script> //         Easter egg:
+applyLanguage(); //  Congratulations!
+</script> //          you found a piece of code that survived the deadline chaos.
+//                    -Felyxorin.
+-->
 
 <link rel="stylesheet" href="css/menu.css">
 
@@ -112,7 +117,11 @@ data-lang="back">
 
 </div>
 
-
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    applyLanguage();
+});
+</script>
 
 <script src="js/settings.js"></script>
 

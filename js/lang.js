@@ -1,37 +1,85 @@
+const defaultLanguage = "ko";
+
+const selectableLanguages = new Set([
+    "ko",
+    "en",
+    "fr"
+]);
+
+
+function getLanguage(){
+
+    const saved =
+        localStorage.getItem("lang");
+
+
+    return selectableLanguages.has(saved)
+        ? saved
+        : defaultLanguage;
+
+}
+
+
+
 async function applyLanguage(){
 
-
-const lang =
-localStorage.getItem("lang")
-||
-"en";
+    const lang =
+        getLanguage();
 
 
-const res =
-await fetch(
-`public/lang/${lang}.json?${Date.now()}`
-);
+    const response =
+        await fetch(
+            `public/lang/${lang}.json?time=${Date.now()}`
+        );
 
 
-const data =
-await res.json();
+    const data =
+        await response.json();
 
 
 
-document
-.querySelectorAll("[data-lang]")
-.forEach(el=>{
+    document.documentElement.lang =
+        lang;
 
 
-let key =
-el.dataset.lang;
+
+    document
+    .querySelectorAll("[data-lang]")
+    .forEach(element=>{
 
 
-if(data[key])
-el.innerHTML=data[key];
+        const key =
+            element.dataset.lang;
 
 
-});
+        if(data[key]){
 
+            element.textContent =
+                data[key];
+
+        }
+
+    });
+
+}
+
+
+
+async function changeLanguage(lang){
+
+    if(!selectableLanguages.has(lang)){
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "lang",
+        lang
+    );
+
+
+    await applyLanguage();
 
 }

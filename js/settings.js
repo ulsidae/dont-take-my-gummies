@@ -1,105 +1,83 @@
-async function loadLanguage(){
+function initLanguage(){
 
-    const lang =
-    localStorage.getItem("lang")
-    || "en";
-
-
-    const response =
-    await fetch(
-        `public/lang/${lang}.json?time=${Date.now()}`
-    );
+    const selector =
+        document.getElementById("language");
 
 
-    const data =
-    await response.json();
+    if (!selector) return;
 
 
-
-    document
-    .querySelectorAll("[data-lang]")
-    .forEach(element=>{
-
-
-        const key =
-        element.dataset.lang;
+    const saved =
+        localStorage.getItem("lang")
+        || "ko";
 
 
-        if(data[key]){
+    selector.value =
+        saved;
 
-            element.textContent =
-            data[key];
+
+    selector.addEventListener(
+        "change",
+        ()=>{
+
+            localStorage.setItem(
+                "lang",
+                selector.value
+            );
+
+
+            location.reload();
 
         }
-
-    });
-
-
-}
-
-
-
-async function changeLanguage(lang){
-
-    localStorage.setItem(
-        "lang",
-        lang
     );
 
-
-    await loadLanguage();
-
 }
-
-
 
 
 
 function initVolume(){
 
-
     const slider =
-    document.getElementById("volume");
+        document.getElementById("volume");
 
 
     const value =
-    document.getElementById("volumeValue");
+        document.getElementById("volumeValue");
 
 
 
     const saved =
-    localStorage.getItem("volume")
-    || 100;
+        localStorage.getItem("volume")
+        || 100;
 
 
 
-    slider.value=saved;
+    slider.value =
+        saved;
 
-    value.textContent=saved;
+
+    value.textContent =
+        saved;
 
 
 
     slider.addEventListener(
-    "input",
-    ()=>{
+        "input",
+        ()=>{
+
+            localStorage.setItem(
+                "volume",
+                slider.value
+            );
 
 
-        localStorage.setItem(
-            "volume",
-            slider.value
-        );
+            value.textContent =
+                slider.value;
 
-
-        value.textContent =
-        slider.value;
-
-
-    });
-
+        }
+    );
 
 }
-
-
 
 
 
@@ -107,11 +85,10 @@ document.addEventListener(
 "DOMContentLoaded",
 async()=>{
 
+    await applyLanguage();
 
-    await loadLanguage();
-
+    initLanguage();   // 추가
 
     initVolume();
-
 
 });
