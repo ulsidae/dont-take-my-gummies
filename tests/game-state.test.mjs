@@ -24,6 +24,29 @@ test('creates two players with approved starting resources', () => {
   assert.equal(game.board.length, 24);
 });
 
+test('creates the exact approved 24-tile board sequence', () => {
+  const game = createGame({ players, random: () => 0 });
+
+  assert.deepEqual(game.board.map((tile) => tile.type), [
+    'start', 'territory', 'job', 'event', 'territory', 'blackjack',
+    'jail', 'territory', 'job', 'dice-game', 'territory', 'event',
+    'mafia', 'territory', 'job', 'blackjack', 'territory', 'event',
+    'world-travel', 'territory', 'job', 'dice-game', 'territory', 'event'
+  ]);
+});
+
+test('creates four positive, four negative, and two rare event cards', () => {
+  const game = createGame({ players, random: () => 0 });
+  const composition = game.eventDeck.reduce((counts, card) => {
+    if (card.kind) counts.rare += 1;
+    else if ((card.type === 'debt' && card.amount < 0) || (card.type === 'gummies' && card.amount > 0)) counts.positive += 1;
+    else counts.negative += 1;
+    return counts;
+  }, { positive: 0, negative: 0, rare: 0 });
+
+  assert.deepEqual(composition, { positive: 4, negative: 4, rare: 2 });
+});
+
 test('rejects player counts outside the supported two-to-four range', () => {
   assert.throws(() => createGame({ players: players.slice(0, 1) }), RangeError);
   assert.throws(() => createGame({ players: [...players, { id: 'blue' }, { id: 'yellow' }, { id: 'purple' }] }), RangeError);
@@ -75,6 +98,112 @@ test('landing on an opponent territory adds ₩50,000 debt', () => {
   };
 
   assert.equal(resolveTile(visitor).players[1].debt, 1_050_000);
+});
+
+test('automatic tile outcomes replace stale prior-player feedback', () => {
+  const created = createGame({ players, random: () => 0 });
+  const staleLog = [{ type: 'territory-declined', playerId: 'red', tileIndex: 1 }];
+  const jobGame = {
+    ...created,
+    activePlayerIndex: 1,
+    players: [created.players[0], { ...created.players[1], position: 2 }],
+    phase: 'resolving-tile',
+    log: staleLog
+  };
+  const jobResolved = resolveTile(jobGame);
+
+  assert.equal(jobResolved.phase, 'turn-complete');
+  assert.deepEqual(jobResolved.log.at(-1), {
+    type: 'job',
+    playerId: 'green',
+    reward: 50_000
+  });
+
+  const startGame = {
+    ...created,
+    activePlayerIndex: 1,
+    players: [created.players[0], { ...created.players[1], position: 22 }],
+    log: staleLog
+  };
+  const startResolved = resolveTile(rollStandardTurn(startGame));
+
+  assert.equal(startResolved.phase, 'turn-complete');
+  assert.deepEqual(startResolved.log.at(-1), {
+    type: 'start',
+    playerId: 'green',
+    gummiesAwarded: 1
+  });
+});
+
+test('territory charges and purchases record the just-completed action', () => {
+  const created = createGame({ players, random: () => 0 });
+  const staleLog = [{ type: 'world-travel-declined', playerId: 'red' }];
+  const ownedTile = { ...created.board[1], ownerId: 'red' };
+  const visitor = {
+    ...created,
+    activePlayerIndex: 1,
+    board: [created.board[0], ownedTile, ...created.board.slice(2)],
+    players: [created.players[0], { ...created.players[1], position: 1 }],
+    phase: 'resolving-tile',
+    log: staleLog
+  };
+  const charged = resolveTile(visitor);
+
+  assert.deepEqual(charged.log.at(-1), {
+    type: 'territory-charge',
+    playerId: 'green',
+    ownerId: 'red',
+    tileIndex: 1,
+    amount: 50_000
+  });
+
+  const offered = resolveTile({
+    ...created,
+    activePlayerIndex: 1,
+    players: [created.players[0], { ...created.players[1], position: 1 }],
+    phase: 'resolving-tile',
+    log: staleLog
+  });
+  const bought = buyTerritory(offered);
+
+  assert.deepEqual(bought.log.at(-1), {
+    type: 'territory-purchased',
+    playerId: 'green',
+    tileIndex: 1,
+    amount: 100_000
+  });
+});
+
+test('landing in Jail and failed Jail turns record current-player outcomes', () => {
+  const created = createGame({ players, random: () => 0 });
+  const staleLog = [{ type: 'territory-declined', playerId: 'red', tileIndex: 1 }];
+  const landed = resolveTile({
+    ...created,
+    activePlayerIndex: 1,
+    players: [created.players[0], { ...created.players[1], position: 6 }],
+    phase: 'resolving-tile',
+    log: staleLog
+  });
+
+  assert.deepEqual(landed.log.at(-1), {
+    type: 'jail-entered',
+    playerId: 'green'
+  });
+
+  const rolls = [0, 0.2];
+  const failed = resolveJailTurn({
+    ...landed,
+    phase: 'awaiting-roll',
+    random: () => rolls.shift()
+  });
+
+  assert.deepEqual(failed.log.at(-1), {
+    type: 'jail-roll',
+    playerId: 'green',
+    dice: [1, 2],
+    released: false,
+    attempts: 1
+  });
 });
 
 test('declares victory at zero debt and defeat at zero gummies', () => {
@@ -137,6 +266,13 @@ test('third failed jail attempt releases without moving', () => {
   assert.equal(released.players[0].jailAttempts, 0);
   assert.equal(released.players[0].position, 6);
   assert.equal(released.phase, 'turn-complete');
+  assert.deepEqual(released.log.at(-1), {
+    type: 'jail-roll',
+    playerId: 'red',
+    dice: [1, 2],
+    released: true,
+    attempts: 3
+  });
 });
 
 test('World Travel spends one gummy and resolves a non-corner destination once', () => {

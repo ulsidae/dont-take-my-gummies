@@ -133,7 +133,7 @@ export function rollStandardTurn(game) {
     ...game,
     players,
     phase: 'resolving-tile',
-    lastRoll: { dice, total: movement }
+    lastRoll: { dice, total: movement, passedStart }
   };
 }
 
@@ -182,7 +182,10 @@ export function resolveTile(game) {
 
   if (tile.type === TILE_TYPES.JOB) {
     const reward = 50_000 + Math.floor(game.random() * 100_001);
-    return finishTurn(replaceActivePlayer(game, applyDebt(activePlayer, -reward)));
+    return finishTurn({
+      ...replaceActivePlayer(game, applyDebt(activePlayer, -reward)),
+      log: [...game.log, { type: 'job', playerId: activePlayer.id, reward }]
+    });
   }
 
   if (tile.type === TILE_TYPES.TERRITORY) {
@@ -195,13 +198,30 @@ export function resolveTile(game) {
     }
 
     if (tile.ownerId !== activePlayer.id) {
-      return finishTurn(replaceActivePlayer(game, applyDebt(activePlayer, 50_000)));
+      return finishTurn({
+        ...replaceActivePlayer(game, applyDebt(activePlayer, 50_000)),
+        log: [...game.log, {
+          type: 'territory-charge',
+          playerId: activePlayer.id,
+          ownerId: tile.ownerId,
+          tileIndex,
+          amount: 50_000
+        }]
+      });
     }
+
+    return finishTurn({
+      ...game,
+      log: [...game.log, { type: 'territory-owned', playerId: activePlayer.id, tileIndex }]
+    });
   }
 
   if (tile.type === TILE_TYPES.JAIL) {
     const jailedPlayer = { ...activePlayer, jailed: true, jailAttempts: 0 };
-    return finishTurn(replaceActivePlayer(game, jailedPlayer));
+    return finishTurn({
+      ...replaceActivePlayer(game, jailedPlayer),
+      log: [...game.log, { type: 'jail-entered', playerId: activePlayer.id }]
+    });
   }
 
   if (tile.type === TILE_TYPES.WORLD_TRAVEL) {
@@ -240,6 +260,17 @@ export function resolveTile(game) {
     return drawEventCard(game);
   }
 
+  if (tile.type === TILE_TYPES.START) {
+    return finishTurn({
+      ...game,
+      log: [...game.log, {
+        type: 'start',
+        playerId: activePlayer.id,
+        gummiesAwarded: game.lastRoll?.passedStart ? 1 : 0
+      }]
+    });
+  }
+
   return finishTurn(game);
 }
 
@@ -265,7 +296,13 @@ export function buyTerritory(game) {
     board: game.board.map((currentTile, index) => (
       index === tileIndex ? { ...currentTile, ownerId: activePlayer.id } : currentTile
     )),
-    pendingAction: null
+    pendingAction: null,
+    log: [...game.log, {
+      type: 'territory-purchased',
+      playerId: activePlayer.id,
+      tileIndex,
+      amount: 100_000
+    }]
   };
 
   return finishTurn(boughtGame);
@@ -300,13 +337,21 @@ export function resolveJailTurn(game) {
 
   if (dice[0] !== dice[1]) {
     const jailAttempts = activePlayer.jailAttempts + 1;
+    const released = jailAttempts === 3;
     const releasedPlayer = jailAttempts === 3
       ? { ...activePlayer, jailed: false, jailAttempts: 0 }
       : { ...activePlayer, jailAttempts };
 
     return finishTurn({
       ...replaceActivePlayer(game, releasedPlayer),
-      lastRoll
+      lastRoll,
+      log: [...game.log, {
+        type: 'jail-roll',
+        playerId: activePlayer.id,
+        dice,
+        released,
+        attempts: jailAttempts
+      }]
     });
   }
 
