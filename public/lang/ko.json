@@ -1,5 +1,5 @@
 {
-  "title": "내 젤리 빺지 마!",
+  "title": "내 젤리 뺏지 마!",
   "subtitle": "[젤리 사수 대작전]",
   "start": "🎲 게임 시작",
   "developer": "⚙ 제작자",
@@ -23,7 +23,7 @@
   "victory": "승리!",
   "defeat": "패배",
   "nextTurn": "다음 차례",
-  "gamePageTitle": "내 젤리 빺지 마! — 게임",
+  "gamePageTitle": "내 젤리 뺏지 마! — 게임",
   "setupEyebrow": "한 기기에서 함께 플레이",
   "setupIntro": "2~4명의 캐릭터를 고르고, 젤리를 지키며 빚에서 벗어나세요.",
   "startGameCount": "{count}인 게임 시작",
