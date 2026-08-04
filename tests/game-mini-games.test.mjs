@@ -140,10 +140,11 @@ test('a rare debt-clear card only wins on its 1-in-100 roulette slot', () => {
   const resolved = drawEventCard(rare);
 
   assert.equal(resolved.players[0].debt, 0);
+  assert.equal(resolved.players[0].gummies, 2);
   assert.equal(resolved.result.type, 'victory');
 });
 
-test('rare roulette losses do not change resources and a debt-double win doubles Debt', () => {
+test('a failed rare roulette spin costs one gummy but otherwise leaves resources unchanged', () => {
   const game = createGame({ players, random: () => 0 });
   const failed = drawEventCard({
     ...game,
@@ -151,12 +152,36 @@ test('rare roulette losses do not change resources and a debt-double win doubles
     eventDeck: [{ kind: 'debt-clear-roulette' }],
     eventDiscard: []
   });
+
+  assert.equal(failed.players[0].debt, 1_000_000);
+  assert.equal(failed.players[0].gummies, 2);
+});
+
+test('a winning debt-double roulette spin costs one gummy and doubles Debt', () => {
+  const game = createGame({ players, random: () => 0 });
   const doubled = drawEventCard({
     ...game,
     eventDeck: [{ kind: 'debt-double-roulette' }],
     eventDiscard: []
   });
 
-  assert.equal(failed.players[0].debt, 1_000_000);
   assert.equal(doubled.players[0].debt, 2_000_000);
+  assert.equal(doubled.players[0].gummies, 2);
+});
+
+test('a final-gummy roulette stake defeats the player before the spin', () => {
+  const game = createGame({ players, random: () => 0 });
+  const finalGummy = {
+    ...game,
+    random: () => assert.fail('roulette should not spin after the final gummy is spent'),
+    players: [{ ...game.players[0], gummies: 1 }, game.players[1]],
+    eventDeck: [{ kind: 'debt-clear-roulette' }],
+    eventDiscard: []
+  };
+  const resolved = drawEventCard(finalGummy);
+
+  assert.equal(resolved.players[0].gummies, 0);
+  assert.equal(resolved.players[0].debt, 1_000_000);
+  assert.equal(resolved.phase, 'game-over');
+  assert.equal(resolved.result.type, 'defeat');
 });

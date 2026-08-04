@@ -536,21 +536,33 @@ export function drawEventCard(game) {
 
   const activePlayer = getActivePlayer(game);
   const isRoulette = card.kind === 'debt-clear-roulette' || card.kind === 'debt-double-roulette';
+  const paidPlayer = isRoulette ? applyGummies(activePlayer, -1) : activePlayer;
+  const spentGame = {
+    ...replaceActivePlayer(game, paidPlayer),
+    eventDeck: remainingDeck,
+    eventDiscard: [...(game.eventDeck.length === 0 ? [] : game.eventDiscard), card]
+  };
+
+  if (isRoulette && paidPlayer.gummies === 0) {
+    return finishTurn({
+      ...spentGame,
+      log: [...game.log, { type: 'event-card', playerId: activePlayer.id, card, winningSlot: null, won: false }]
+    });
+  }
+
   const winningSlot = isRoulette ? Math.floor(game.random() * 100) : null;
   const won = winningSlot === 0;
   const updatedPlayer = card.kind === 'debt-clear-roulette' && won
-    ? { ...activePlayer, debt: 0 }
+    ? { ...paidPlayer, debt: 0 }
     : card.kind === 'debt-double-roulette' && won
-      ? { ...activePlayer, debt: activePlayer.debt * 2 }
+      ? { ...paidPlayer, debt: paidPlayer.debt * 2 }
       : card.type === 'debt'
     ? applyDebt(activePlayer, card.amount)
     : card.type === 'gummies'
       ? applyGummies(activePlayer, card.amount)
-      : activePlayer;
+      : paidPlayer;
   const drawnGame = {
-    ...replaceActivePlayer(game, updatedPlayer),
-    eventDeck: remainingDeck,
-    eventDiscard: [...(game.eventDeck.length === 0 ? [] : game.eventDiscard), card],
+    ...replaceActivePlayer(spentGame, updatedPlayer),
     log: [...game.log, { type: 'event-card', playerId: activePlayer.id, card, winningSlot, won }]
   };
 
