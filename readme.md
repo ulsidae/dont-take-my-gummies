@@ -102,12 +102,10 @@ This project focused on developing a functional prototype through clear role dis
 
 Responsibilities:
 
-- Project schedule and goal management
-- Feature prioritization
-- Requirement organization and task planning
-- GitHub Pages deployment environment setup
-- Technical decision-making
-- Team coordination
+- Project planning and goal management
+- Feature prioritization and requirement definition
+- Frontend implementation and deployment setup
+- Technical decision-making and team coordination
 
 ## hhandc
 
@@ -115,10 +113,9 @@ Responsibilities:
 
 Responsibilities:
 
-- Game board system development
-- Core game structure design
-- Gameplay idea suggestions
-- Game architecture review
+- Game board system development and architecture design
+- Gameplay concept suggestions
+- Game structure review
 
 ## irupark500-cmd
 
@@ -126,9 +123,9 @@ Responsibilities:
 
 Responsibilities:
 
-- UI design
-- User interaction design
-- User experience improvements
+- Title image design
+- Character image creation
+- User experience improvement suggestions
 
 The goal was not simply to divide tasks, but to create a development process where planning, implementation, and validation were naturally connected.
 
