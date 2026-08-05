@@ -1,5 +1,13 @@
 # 🍬 Don't Take My Gummies!
 
+> 📌 **Project Status: Completed**
+> 
+> This project was completed as an MVP for the NHN Game x AI Hackathon.
+> 
+> The repository is preserved as a development record and portfolio reference.
+> 
+> No further feature development is planned at this time.
+
 ## AI-Assisted Game Development Project
 
 **Don't Take My Gummies!** is an AI-assisted board game project developed for the NHN Game x AI Hackathon.
